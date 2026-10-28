@@ -2,7 +2,7 @@ name: ScheduleMADI CI/CD
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "**" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
@@ -75,7 +75,7 @@ jobs:
         run: dotnet workload restore ScheduleMADI/ScheduleMADI.csproj
 
       - name: Build validation APK
-        if: github.event_name == 'pull_request' || github.repository != 'wildchair/ScheduleMADI'
+        if: github.event_name == 'pull_request' || github.repository != 'wildchair/ScheduleMADI' || github.ref != 'refs/heads/master'
         run: |
           dotnet publish ScheduleMADI/ScheduleMADI.csproj \
             -c Release -f net10.0-android36.0 \
@@ -83,11 +83,11 @@ jobs:
             -p:AndroidPackageFormats="apk"
 
       - name: Decode keystore
-        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI'
+        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI' && github.ref == 'refs/heads/master'
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 -d > keystore.jks
 
       - name: Build signed AAB
-        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI'
+        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI' && github.ref == 'refs/heads/master'
         run: |
           dotnet publish ScheduleMADI/ScheduleMADI.csproj \
             -c Release -f net10.0-android36.0 \
@@ -102,7 +102,7 @@ jobs:
             -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Build signed APK
-        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI'
+        if: github.event_name != 'pull_request' && github.repository == 'wildchair/ScheduleMADI' && github.ref == 'refs/heads/master'
         run: |
           dotnet publish ScheduleMADI/ScheduleMADI.csproj \
             -c Release -f net10.0-android36.0 \
